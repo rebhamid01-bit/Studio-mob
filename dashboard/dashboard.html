@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self' https://cdnjs.cloudflare.com; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Studio Mobilier Pro</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════════════════
+   CSS VARIABLES — mirrors main app
+══════════════════════════════════════════════════════════ */
+:root {
+  --bg:        #0a0a0a;
+  --surface:   #111;
+  --card:      #181818;
+  --card2:     #1e1e1e;
+  --border:    #242424;
+  --border2:   #2e2e2e;
+  --gold:      #c9a84c;
+  --gold-dim:  #8a6f30;
+  --gold-pale: #f0dfa0;
+  --text:      #e8e8e8;
+  --text2:     #b0b0b0;
+  --muted:     #666;
+  --muted2:    #444;
+  --danger:    #e05c5c;
+  --green:     #5cba7d;
+  --green-dim: #2d6b47;
+  --blue:      #5b8dee;
+  --purple:    #9b7de8;
+  --orange:    #e89b4a;
+  --radius:    8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --sidebar-w: 220px;
+  --topbar-h:  56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LAYOUT SHELL
+══════════════════════════════════════════════════════════ */
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-rows: var(--topbar-h) 1fr;
+  height: 100vh;
+}
+
+/* ── Top bar ─────────────────────────────────────────── */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
+}
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  -webkit-app-region: no-drag;
+}
+.topbar-logo {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #0a0a0a;
+  flex-shrink: 0;
+}
+.topbar-name {
+  font-size: 0.8rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text);
+}
+.topbar-sep { width: 1px; height: 24px; background: var(--border2); }
+.topbar-title {
+  font-size: 0.72rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted);
+}
+.topbar-spacer { flex: 1; }
+.topbar-actions {
+  display: flex; gap: 8px;
+  -webkit-app-region: no-drag;
+}
+.topbar-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: var(--radius);
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--text2);
+  font-size: 0.72rem; letter-spacing: 0.06em;
+  cursor: pointer; transition: all 0.15s;
+  text-transform: uppercase; font-weight: 500;
+  -webkit-app-region: no-drag;
+}
+.topbar-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.topbar-btn.primary {
+  background: var(--gold-dim); border-color: var(--gold-dim); color: #0a0a0a;
+}
+.topbar-btn.primary:hover { background: var(--gold); border-color: var(--gold); }
+.topbar-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  padding: 16px 0;
+}
+.sidebar-section {
+  padding: 0 12px;
+  margin-bottom: 4px;
+}
+.sidebar-label {
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted2);
+  padding: 8px 8px 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px; border-radius: var(--radius);
+  cursor: pointer; transition: all 0.12s;
+  font-size: 0.78rem; color: var(--text2);
+  user-select: none; font-weight: 400;
+}
+.nav-item svg { width: 15px; height: 15px; color: var(--muted); flex-shrink: 0; transition: color 0.12s; }
+.nav-item:hover { background: var(--card); color: var(--text); }
+.nav-item:hover svg { color: var(--text2); }
+.nav-item.active { background: rgba(201,168,76,0.12); color: var(--gold); }
+.nav-item.active svg { color: var(--gold); }
+.sidebar-spacer { flex: 1; }
+.sidebar-footer {
+  padding: 12px 12px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.sidebar-version {
+  font-size: 0.65rem; color: var(--muted2);
+  padding: 6px 10px;
+}
+
+/* ── Main content ────────────────────────────────────── */
+.main {
+  overflow-y: auto;
+  background: var(--bg);
+}
+.section {
+  display: none;
+  padding: 24px;
+}
+.section.active { display: block; }
+
+/* ══════════════════════════════════════════════════════════
+   FILTERS BAR
+══════════════════════════════════════════════════════════ */
+.filters-bar {
+  display: flex; gap: 10px; align-items: flex-end;
+  flex-wrap: wrap;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+.filter-field { display: flex; flex-direction: column; gap: 4px; }
+.filter-field label {
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted);
+}
+.filter-field select,
+.filter-field input {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius); color: var(--text);
+  font-size: 0.75rem; padding: 5px 8px; outline: none;
+  min-width: 110px; transition: border-color 0.15s;
+  -webkit-appearance: none; appearance: none;
+}
+.filter-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center; padding-right: 24px;
+}
+.filter-field select:focus,
+.filter-field input:focus { border-color: var(--gold); }
+.filter-actions { display: flex; gap: 8px; padding-top: 18px; }
+.filter-btn {
+  padding: 5px 14px; border-radius: var(--radius);
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--text2); font-size: 0.72rem; cursor: pointer;
+  transition: all 0.12s; white-space: nowrap;
+}
+.filter-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+.filter-btn.apply {
+  background: var(--gold-dim); border-color: var(--gold-dim); color: #0a0a0a;
+}
+.filter-btn.apply:hover { background: var(--gold); }
+
+/* ══════════════════════════════════════════════════════════
+   KPI GRID
+══════════════════════════════════════════════════════════ */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.kpi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.kpi-card:hover { border-color: var(--border2); }
+.kpi-card.gold { border-left: 3px solid var(--gold); }
+.kpi-card.green { border-left: 3px solid var(--green); }
+.kpi-card.blue  { border-left: 3px solid var(--blue); }
+.kpi-card.purple{ border-left: 3px solid var(--purple); }
+.kpi-card.orange{ border-left: 3px solid var(--orange); }
+.kpi-card.danger{ border-left: 3px solid var(--danger); }
+.kpi-label {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 1.45rem; font-weight: 700;
+  color: var(--text); line-height: 1;
+  margin-bottom: 6px;
+  word-break: break-all;
+}
+.kpi-sub {
+  font-size: 0.68rem; color: var(--muted);
+}
+.kpi-icon {
+  position: absolute; right: 14px; top: 14px;
+  font-size: 1.1rem; opacity: 0.2;
+}
+.kpi-trend {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 0.65rem; font-weight: 600;
+  padding: 2px 6px; border-radius: 4px; margin-top: 4px;
+}
+.kpi-trend.up   { color: var(--green); background: rgba(92,186,125,0.12); }
+.kpi-trend.down { color: var(--danger); background: rgba(224,92,92,0.12); }
+.kpi-trend.flat { color: var(--muted); background: rgba(100,100,100,0.12); }
+
+/* ══════════════════════════════════════════════════════════
+   CHART CARDS
+══════════════════════════════════════════════════════════ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.chart-card.wide { grid-column: 1 / -1; }
+.chart-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.chart-title {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text2);
+}
+.chart-sub {
+  font-size: 0.62rem; color: var(--muted); margin-top: 2px;
+}
+.chart-badge {
+  font-size: 0.6rem; padding: 2px 8px; border-radius: 4px;
+  background: rgba(201,168,76,0.12); color: var(--gold);
+  font-weight: 600; letter-spacing: 0.05em;
+}
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap.tall { height: 280px; }
+
+/* ══════════════════════════════════════════════════════════
+   DATA TABLES
+══════════════════════════════════════════════════════════ */
+.tables-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.table-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.table-card.wide { grid-column: 1 / -1; }
+.table-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.table-title {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text2);
+}
+.table-count {
+  font-size: 0.6rem; color: var(--muted);
+  background: var(--surface); border-radius: 4px;
+  padding: 2px 7px;
+}
+table {
+  width: 100%; border-collapse: collapse;
+}
+th {
+  font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted);
+  padding: 8px 14px; text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+th.right, td.right { text-align: right; }
+td {
+  padding: 9px 14px; font-size: 0.78rem; color: var(--text2);
+  border-bottom: 1px solid var(--border);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.td-primary { color: var(--text); font-weight: 500; max-width: 180px; }
+.td-primary span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-gold { color: var(--gold); font-weight: 600; }
+.td-green { color: var(--green); }
+.td-muted { color: var(--muted); font-size: 0.7rem; }
+.td-rank {
+  font-size: 0.68rem; font-weight: 700;
+  color: var(--muted2); width: 28px;
+}
+.td-rank.top1 { color: var(--gold); }
+.td-rank.top2 { color: var(--text2); }
+.td-rank.top3 { color: var(--orange); }
+.status-pill {
+  display: inline-block; font-size: 0.6rem; font-weight: 600;
+  padding: 2px 7px; border-radius: 4px; white-space: nowrap;
+}
+.status-OK           { background: rgba(92,186,125,0.15); color: var(--green); }
+.status-LOW_MARGIN_RISK { background: rgba(232,155,74,0.15); color: var(--orange); }
+.status-OVERPRICE_RISK  { background: rgba(91,141,238,0.15); color: var(--blue); }
+.status-LOSS         { background: rgba(224,92,92,0.15); color: var(--danger); }
+
+/* ══════════════════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════════════════ */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px;
+  padding: 48px 24px; color: var(--muted);
+  text-align: center;
+}
+.empty-state-icon { font-size: 2.5rem; opacity: 0.3; }
+.empty-state-title { font-size: 0.85rem; font-weight: 500; color: var(--text2); }
+.empty-state-sub { font-size: 0.72rem; color: var(--muted); }
+
+/* ══════════════════════════════════════════════════════════
+   LOADING OVERLAY
+══════════════════════════════════════════════════════════ */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(10,10,10,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; opacity: 0;
+  pointer-events: none; transition: opacity 0.2s;
+}
+.loading-overlay.visible { opacity: 1; pointer-events: all; }
+.loading-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════════════════
+   SECTION PAGE HEADERS
+══════════════════════════════════════════════════════════ */
+.page-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-title {
+  font-size: 1rem; font-weight: 600; color: var(--text);
+}
+.page-sub {
+  font-size: 0.7rem; color: var(--muted); margin-top: 2px;
+}
+.page-actions { display: flex; gap: 8px; }
+
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  min-width: 260px; max-width: 480px;
+  padding: 11px 18px 11px 14px;
+  border-radius: var(--radius);
+  border-left: 3px solid transparent;
+  background: var(--card2); color: var(--text2);
+  font-size: 0.78rem; box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9999;
+}
+.toast.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: var(--green); color: #a8d8bc; background: #0e1a13; }
+.toast.error   { border-color: var(--danger); color: #e8b4b4; background: #1a0e0e; }
+.toast.info    { border-color: var(--gold); color: var(--gold-pale); background: #1a1608; }
+
+/* ══════════════════════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .charts-grid, .tables-grid { grid-template-columns: 1fr; }
+  .chart-card.wide, .table-card.wide { grid-column: 1; }
+}
+@media (max-width: 800px) {
+  :root { --sidebar-w: 48px; }
+  .nav-item span { display: none; }
+  .sidebar-label, .sidebar-version { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══════════ TOP BAR ══════════ -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo">SM</div>
+      <span class="topbar-name">Studio Mobilier Pro</span>
+    </div>
+    <div class="topbar-sep"></div>
+    <span class="topbar-title">Tableau de Bord</span>
+    <div class="topbar-spacer"></div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" id="btnExportCsv">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h10v10H3zM8 6v4M6 8h4"/></svg>
+        Export CSV
+      </button>
+      <button class="topbar-btn" id="btnRefresh">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8a6 6 0 1 0 1.5-4M2 4v4h4"/></svg>
+        Actualiser
+      </button>
+      <button class="topbar-btn primary" id="btnBackToApp">
+        ← Retour
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Vue</div>
+      <div class="nav-item active" data-section="overview">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        <span>Vue générale</span>
+      </div>
+      <div class="nav-item" data-section="revenue">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1,12 5,7 8,9 12,4 15,6"/></svg>
+        <span>Chiffre d'affaires</span>
+      </div>
+      <div class="nav-item" data-section="products">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="12" height="8" rx="1"/><path d="M5 6V4a3 3 0 0 1 6 0v2"/></svg>
+        <span>Produits</span>
+      </div>
+      <div class="nav-item" data-section="clients">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5"/></svg>
+        <span>Clients</span>
+      </div>
+      <div class="nav-item" data-section="margins">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/></svg>
+        <span>Marges</span>
+      </div>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-footer">
+      <div class="sidebar-version" id="sidebarVersion">v1.0.0</div>
+    </div>
+  </nav>
+
+  <!-- ══════════ MAIN CONTENT ══════════ -->
+  <main class="main" id="mainContent">
+
+    <!-- ── FILTERS BAR (shared, injected into each section) ─ -->
+    <template id="tmplFilters">
+      <div class="filters-bar" id="filtersBar">
+        <div class="filter-field">
+          <label>Année</label>
+          <select id="fYear"><option value="">Toutes</option></select>
+        </div>
+        <div class="filter-field">
+          <label>Mois</label>
+          <select id="fMonth">
+            <option value="">Tous</option>
+            <option value="01">Janvier</option><option value="02">Février</option>
+            <option value="03">Mars</option><option value="04">Avril</option>
+            <option value="05">Mai</option><option value="06">Juin</option>
+            <option value="07">Juillet</option><option value="08">Août</option>
+            <option value="09">Septembre</option><option value="10">Octobre</option>
+            <option value="11">Novembre</option><option value="12">Décembre</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>Du</label>
+          <input type="date" id="fDateFrom">
+        </div>
+        <div class="filter-field">
+          <label>Au</label>
+          <input type="date" id="fDateTo">
+        </div>
+        <div class="filter-field">
+          <label>Client</label>
+          <select id="fClient"><option value="">Tous</option></select>
+        </div>
+        <div class="filter-field">
+          <label>Statut</label>
+          <select id="fStatus">
+            <option value="">Tous</option>
+            <option value="OK">OK</option>
+            <option value="LOW_MARGIN_RISK">Marge faible</option>
+            <option value="OVERPRICE_RISK">Prix élevé</option>
+            <option value="LOSS">Perte</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="filter-btn apply" id="btnApplyFilter">Appliquer</button>
+          <button class="filter-btn" id="btnResetFilter">Réinitialiser</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- ══════════ SECTION: OVERVIEW ══════════ -->
+    <div class="section active" id="sec-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Vue Générale</div>
+          <div class="page-sub" id="overviewSub">Chargement…</div>
+        </div>
+      </div>
+      <div id="filtersSlot-overview"></div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpiGrid">
+        <!-- injected by JS -->
+      </div>
+
+      <!-- Charts row 1 -->
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Chiffre d'Affaires Mensuel</div>
+              <div class="chart-sub">Revenus et profits sur les 12 derniers mois</div>
+            </div>
+            <span class="chart-badge" id="revenueChartBadge">12 mois</span>
+          </div>
+          <div class="chart-wrap tall"><canvas id="chartRevenue"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Répartition par Statut</div>
+              <div class="chart-sub">Nombre de devis par catégorie</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Décomposition des Coûts</div>
+              <div class="chart-sub">Répartition moyenne par composante</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chartCosts"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Top tables quick view -->
+      <div class="tables-grid">
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">Top Produits</span>
+            <span class="table-count" id="topProductsCount">—</span>
+          </div>
+          <div id="topProductsBody"></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <span class="table-title">Top Clients</span>
+            <span class="table-count" id="topClientsCount">—</span>
+          </div>
+          <div id="topClientsBody"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SECTION: REVENUE ══════════ -->
+    <div class="section" id="sec-revenue">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Chiffre d'Affaires</div>
+          <div class="page-sub">Analyse financière et tendances</div>
+        </div>
+      </div>
+      <div id="filtersSlot-revenue"></div>
+      <div class="kpi-grid" id="revenueKpi"></div>
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Évolution Mensuelle Détaillée</div>
+              <div class="chart-sub">Revenue · Profit · Coût de revient</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="chartRevenueDetail"></canvas></div>
+        </div>
+        <div class="chart-card wide">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Distribution des Profits</div>
+              <div class="chart-sub">Répartition par tranche de bénéfice</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chartProfitDist"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SECTION: PRODUCTS ══════════ -->
+    <div class="section" id="sec-products">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Analyse Produits</div>
+          <div class="page-sub">Performance par type de produit</div>
+        </div>
+      </div>
+      <div id="filtersSlot-products"></div>
+      <div class="tables-grid">
+        <div class="table-card wide">
+          <div class="table-header">
+            <span class="table-title">Tous les Produits — Classement</span>
+            <span class="table-count" id="allProductsCount">—</span>
+          </div>
+          <div id="allProductsBody"></div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Revenue par Produit</div>
+              <div class="chart-sub">Top 10 produits par chiffre d'affaires</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="chartProductRevenue"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SECTION: CLIENTS ══════════ -->
+    <div class="section" id="sec-clients">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Analyse Clients</div>
+          <div class="page-sub">Portefeuille clients et fidélité</div>
+        </div>
+      </div>
+      <div id="filtersSlot-clients"></div>
+      <div class="tables-grid">
+        <div class="table-card wide">
+          <div class="table-header">
+            <span class="table-title">Classement Clients</span>
+            <span class="table-count" id="allClientsCount">—</span>
+          </div>
+          <div id="allClientsBody"></div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Dépenses Clients</div>
+              <div class="chart-sub">Top 10 clients par volume d'achat</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="chartClientRevenue"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ SECTION: MARGINS ══════════ -->
+    <div class="section" id="sec-margins">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Analyse des Marges</div>
+          <div class="page-sub">Rentabilité et évolution de la marge</div>
+        </div>
+      </div>
+      <div id="filtersSlot-margins"></div>
+      <div class="kpi-grid" id="marginsKpi"></div>
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Évolution de la Marge</div>
+              <div class="chart-sub">Marge sur vente (%) par semaine</div>
+            </div>
+          </div>
+          <div class="chart-wrap tall"><canvas id="chartMarginEvolution"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Statut des Devis</div>
+              <div class="chart-sub">Santé financière du portefeuille</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chartStatusRevenue"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Marge par Produit</div>
+              <div class="chart-sub">Marge moyenne / vente (top 8)</div>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="chartProductMargin"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="charts.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

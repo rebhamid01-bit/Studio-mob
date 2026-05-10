@@ -1,0 +1,71 @@
+{
+  "name": "studio-mobilier-pro",
+  "version": "2.0.0",
+  "description": "Système de Décision Tarifaire — Application locale pour menuisiers",
+  "main": "main.js",
+  "author": "Studio Mobilier",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "start:dev": "NODE_ENV=development electron .",
+    "dist": "electron-builder --win",
+    "dist:dir": "electron-builder --win --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.studiomobilier.pro",
+    "productName": "Studio Mobilier Pro",
+    "copyright": "Copyright © 2024 Studio Mobilier",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "style.css",
+      "app.js",
+      "pricing/**",
+      "storage/**",
+      "reports/**",
+      "assets/**",
+      "node_modules/better-sqlite3/**",
+      "!dist/**"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/better-sqlite3/build/Release/",
+        "to": ".",
+        "filter": ["*.node"]
+      }
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis",     "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowDirChange": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Studio Mobilier Pro",
+      "installerHeaderIcon": "assets/icon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "StudioMobilierPro-Portable-${version}.exe"
+    }
+  }
+}

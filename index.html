@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Mobilier Pro</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="brand">
+    <div class="brand-name">Studio Mobilier Pro</div>
+    <div class="brand-sub">Système de Décision Tarifaire</div>
+    <div class="brand-rule"></div>
+    <div class="app-nav">
+      <button class="app-nav-btn active" id="navPricing">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h10v10H3z"/><path d="M6 6h4M6 8h4M6 10h2"/></svg>
+        Devis
+      </button>
+      <button class="app-nav-btn" id="navDashboard">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+      </button>
+    </div>
+  </header>
+
+  <!-- Client -->
+  <div class="card">
+    <div class="section-label">Client</div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Nom du client</label>
+        <input id="clientName" type="text" placeholder="ex. Dupont Ahmed">
+      </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input id="clientPhone" type="text" placeholder="0XX XX XX XX">
+      </div>
+    </div>
+  </div>
+
+  <!-- Produit -->
+  <div class="card">
+    <div class="section-label">Produit</div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Nom du produit</label>
+        <input id="productName" type="text" placeholder="ex. Armoire">
+      </div>
+      <div class="field">
+        <label>Description (pour le client)</label>
+        <input id="clientDesc" type="text" placeholder="ex. Armoire 3 portes coulissantes">
+      </div>
+    </div>
+  </div>
+
+  <!-- Matériaux -->
+  <div class="card">
+    <div class="section-label">Matériaux</div>
+    <div id="matContainer"></div>
+    <button class="btn-add-row" id="addMatBtn">+ Ajouter un matériau</button>
+  </div>
+
+  <!-- Panne de Chant -->
+  <div class="card">
+    <div class="section-label">Panne de Chant</div>
+    <div id="edgeContainer"></div>
+    <button class="btn-add-row" id="addEdgeBtn">+ Ajouter une panne de chant</button>
+  </div>
+
+  <!-- Accessoires -->
+  <div class="card">
+    <div class="section-label">
+      Accessoires
+      <span style="font-size:0.6rem;color:var(--muted2);font-weight:400;text-transform:none;letter-spacing:0">
+        (coût uniquement)
+      </span>
+    </div>
+    <div id="accContainer"></div>
+    <button class="btn-add-row" id="addAccBtn">+ Ajouter un accessoire</button>
+  </div>
+
+  <!-- Main d'oeuvre -->
+  <div class="card">
+    <div class="section-label">Main d'oeuvre</div>
+    <div class="labor-mode-tabs">
+      <button class="labor-tab active" id="laborFixedTab"  onclick="setLaborMode('fixed')">Coût Fixe</button>
+      <button class="labor-tab"        id="laborHourlyTab" onclick="setLaborMode('hourly')">Heures × Taux</button>
+    </div>
+    <div id="laborFixedPanel">
+      <div class="grid g2">
+        <div class="field">
+          <label>Coût main d'oeuvre (DA)</label>
+          <input id="laborFixed" type="number" min="0" step="0.01" placeholder="0.00" value="0">
+        </div>
+        <div class="field">
+          <label>Description (optionnel)</label>
+          <input id="laborDesc" type="text" placeholder="ex. Pose, finition...">
+        </div>
+      </div>
+    </div>
+    <div id="laborHourlyPanel" style="display:none">
+      <div class="grid g3">
+        <div class="field">
+          <label>Heures travaillées</label>
+          <input id="laborHours" type="number" min="0" step="0.5" placeholder="0.0">
+        </div>
+        <div class="field">
+          <label>Taux horaire (DA/h)</label>
+          <input id="laborRate" type="number" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Description (optionnel)</label>
+          <input id="laborDescH" type="text" placeholder="ex. Menuisier qualifié">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stratégie de Prix -->
+  <div class="card">
+    <div class="section-label">Stratégie de Prix</div>
+    <div class="mode-pill">
+      <button class="mode-pill-btn active" id="modeMarginBtn" onclick="setPricingMode('margin')">Mode Marge</button>
+      <button class="mode-pill-btn"        id="modeMarketBtn" onclick="setPricingMode('market')">Mode Prix Marché</button>
+    </div>
+    <div class="grid g2" style="margin-bottom:12px">
+      <div class="field">
+        <label>Frais généraux (%) <span style="color:var(--danger);font-size:0.6rem">min 10 %</span></label>
+        <input id="indirectRate" type="number" min="10" max="100" step="0.1" placeholder="ex. 15.0">
+      </div>
+      <div class="field">
+        <label>Frais de livraison (DA) <span style="color:var(--muted2);font-size:0.6rem;text-transform:none">hors base marge</span></label>
+        <input id="deliveryCost" type="number" min="0" step="0.01" placeholder="0.00" value="0">
+      </div>
+    </div>
+    <div id="panelMargin">
+      <div class="field">
+        <label>Taux de marge sur coût (%) <span style="color:var(--muted2);font-size:0.6rem;text-transform:none">10 % – 100 %</span></label>
+        <input id="marginRate" type="number" min="10" max="100" step="0.1" placeholder="ex. 50.0">
+      </div>
+    </div>
+    <div id="panelMarket" style="display:none">
+      <div class="field">
+        <label>Prix marché final (DA) <span style="color:var(--muted2);font-size:0.6rem;text-transform:none">doit couvrir COGS + livraison</span></label>
+        <input id="marketPrice" type="number" min="0" step="0.01" placeholder="0.00" disabled>
+      </div>
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>Acompte versé (DA)</label>
+      <input id="advance" type="number" min="0" step="0.01" placeholder="0.00" value="0">
+    </div>
+  </div>
+
+  <!-- Lock Banner -->
+  <div class="lock-banner" id="lockBanner">
+    <div class="lock-dot"></div>
+    <span>Formulaire verrouillé. Cliquez sur <strong>Déverrouiller</strong> pour modifier.</span>
+  </div>
+
+  <!-- Loaded-from-history banner -->
+  <div class="hist-loaded-banner" id="histLoadedBanner">
+    <span>↩</span>
+    <span>Fiche chargée depuis l'historique — modifiez et recalculez pour créer un <strong>nouveau</strong> enregistrement.</span>
+  </div>
+
+  <!-- Risk Banner -->
+  <div class="risk-banner" id="riskBanner">
+    <div class="risk-icon"  id="riskIcon"></div>
+    <div class="risk-body">
+      <div class="risk-title" id="riskTitle"></div>
+      <div class="risk-desc"  id="riskDesc"></div>
+    </div>
+  </div>
+
+  <!-- Decision Metrics -->
+  <div class="metrics-grid" id="metricsGrid" style="display:none">
+    <div class="metric-card">
+      <span class="mc-label">Coût Total / COGS</span>
+      <span class="mc-value" id="mcTotalCost">—</span>
+    </div>
+    <div class="metric-card" id="mcProfitCard">
+      <span class="mc-label">Profit</span>
+      <span class="mc-value" id="mcProfit">—</span>
+    </div>
+    <div class="metric-card mc-highlight">
+      <span class="mc-label">Prix Final</span>
+      <span class="mc-value" id="mcFinalPrice">—</span>
+    </div>
+    <div class="metric-card" id="mcMarginCostCard">
+      <span class="mc-label">Marge / Coût</span>
+      <span class="mc-value" id="mcMarginCost">—</span>
+    </div>
+    <div class="metric-card" id="mcMarginSellCard">
+      <span class="mc-label">Marge / Vente</span>
+      <span class="mc-value" id="mcMarginSell">—</span>
+    </div>
+    <div class="metric-card">
+      <span class="mc-label">Reste à payer</span>
+      <span class="mc-value" id="mcRemaining">—</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn btn-primary" id="calcBtn">Calculer</button>
+    <button class="btn btn-outline"  id="pdfIntBtn">PDF Interne</button>
+    <button class="btn btn-outline"  id="pdfCliBtn">PDF Client</button>
+    <button class="btn btn-outline"  id="unlockBtn" style="display:none;border-color:var(--gold-dim);color:var(--gold)">Déverrouiller</button>
+    <button class="btn btn-ghost"    id="resetBtn">Réinitialiser</button>
+  </div>
+
+  <!-- Output Panel -->
+  <div class="output" id="outputPanel">
+    <div class="output-header">
+      <div>
+        <div class="output-client-name"  id="outClientName">—</div>
+        <div class="output-client-phone" id="outClientPhone"></div>
+      </div>
+      <div class="output-meta" id="outMeta"></div>
+    </div>
+    <div class="view-tabs">
+      <button class="tab" id="tabInt" onclick="switchTab('internal')">Vue Interne</button>
+      <button class="tab" id="tabCli" onclick="switchTab('client')">Vue Client</button>
+    </div>
+    <div class="output-body" id="outBody"></div>
+  </div>
+
+  <!-- Historique Panel -->
+  <div class="hist-panel" id="histPanel">
+    <div class="hist-header" id="histToggle">
+      <div class="hist-header-left">
+        <span class="hist-title">Historique</span>
+        <span class="hist-count" id="histCount">0</span>
+      </div>
+      <span class="hist-chevron" id="histChevron">▼</span>
+    </div>
+    <div class="hist-body" id="histBody">
+      <div class="hist-filters">
+        <div class="hist-filter-field">
+          <label>Statut</label>
+          <select id="hfStatus">
+            <option value="">Tous</option>
+            <option value="OK">OK</option>
+            <option value="LOW_MARGIN_RISK">Marge faible</option>
+            <option value="OVERPRICE_RISK">Prix eleve</option>
+            <option value="LOSS">Perte</option>
+          </select>
+        </div>
+        <div class="hist-filter-field">
+          <label>Prix min (DA)</label>
+          <input id="hfMinPrice" type="number" min="0" step="1" placeholder="0">
+        </div>
+        <div class="hist-filter-field">
+          <label>Prix max (DA)</label>
+          <input id="hfMaxPrice" type="number" min="0" step="1" placeholder="∞">
+        </div>
+        <div class="hist-filter-field">
+          <label>Date début</label>
+          <input id="hfDateFrom" type="date">
+        </div>
+        <div class="hist-filter-field">
+          <label>Date fin</label>
+          <input id="hfDateTo" type="date">
+        </div>
+        <div class="hist-filter-field" style="justify-content:flex-end;padding-top:18px">
+          <button class="btn btn-outline hist-btn" id="hfResetBtn" style="font-size:0.68rem;padding:5px 10px">Effacer filtres</button>
+        </div>
+      </div>
+      <div class="hist-filter-actions">
+        <button class="btn btn-ghost hist-btn" id="histClearBtn">Supprimer tout</button>
+      </div>
+      <div class="hist-list" id="histList"></div>
+    </div>
+  </div>
+
+  <!-- Toast notification (PDF save feedback) -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<!-- Load modules in dependency order -->
+<script src="pricing/calculatePricing.js"></script>
+<script src="storage/history.js"></script>
+<script src="reports/invoices.js"></script>
+<script src="app.js"></script>
+<script>
+// Dashboard navigation — opens dashboard.html in the same window, Back button returns here
+document.getElementById('navDashboard').addEventListener('click', () => {
+  window.location.href = '../dashboard/dashboard.html';
+});
+document.getElementById('navPricing').addEventListener('click', () => {
+  // already here — no-op, just style feedback
+});
+</script>
+</body>
+</html>

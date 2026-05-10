@@ -1,0 +1,20 @@
+# التبعيات
+node_modules/
+dist/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+
+# ملفات البيئة
+.env
+
+# نظام التشغيل
+.DS_Store
+Thumbs.db
+
+# Electron
+*.exe
+*.dmg
+*.AppImage
