@@ -1,46 +1,51 @@
 {
-  "name": "studio-mobilier-pro",
+  "name": "studio-mob",
   "version": "2.0.0",
-  "description": "Système de Décision Tarifaire — Application locale pour menuisiers",
+  "description": "Système de Décision Tarifaire — Application locale pour menuisiers | Studio Mobilier",
   "main": "main.js",
-  "author": "Studio Mobilier",
+  "author": "rebhamid01-bit",
   "license": "UNLICENSED",
   "private": true,
+
   "scripts": {
     "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
     "start:dev": "NODE_ENV=development electron .",
+    "build": "electron-builder --win",
     "dist": "electron-builder --win",
     "dist:dir": "electron-builder --win --dir",
-    "postinstall": "electron-builder install-app-deps"
+    "pack": "electron-builder --win --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "clean": "rimraf dist out"
   },
+
   "dependencies": {
     "better-sqlite3": "^9.4.3"
   },
+
   "devDependencies": {
     "electron": "^28.0.0",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "rimraf": "^6.0.1"
   },
+
   "build": {
     "appId": "com.studiomobilier.pro",
     "productName": "Studio Mobilier Pro",
     "copyright": "Copyright © 2024 Studio Mobilier",
+    
     "directories": {
       "output": "dist",
       "buildResources": "assets"
     },
+    
     "files": [
-      "main.js",
-      "preload.js",
-      "index.html",
-      "style.css",
-      "app.js",
-      "pricing/**",
-      "storage/**",
-      "reports/**",
-      "assets/**",
-      "node_modules/better-sqlite3/**",
-      "!dist/**"
+      "**/*",
+      "!dist/**",
+      "!node_modules/*/{test,__tests__,tests,sample,*.md,*.txt}",
+      "!**/*.map"
     ],
+
     "extraResources": [
       {
         "from": "node_modules/better-sqlite3/build/Release/",
@@ -48,6 +53,7 @@
         "filter": ["*.node"]
       }
     ],
+
     "win": {
       "target": [
         { "target": "nsis",     "arch": ["x64"] },
@@ -55,6 +61,7 @@
       ],
       "icon": "assets/icon.ico"
     },
+
     "nsis": {
       "oneClick": false,
       "allowDirChange": true,
@@ -64,6 +71,7 @@
       "installerHeaderIcon": "assets/icon.ico",
       "deleteAppDataOnUninstall": false
     },
+
     "portable": {
       "artifactName": "StudioMobilierPro-Portable-${version}.exe"
     }
